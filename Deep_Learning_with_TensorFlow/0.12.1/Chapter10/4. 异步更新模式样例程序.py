@@ -15,7 +15,7 @@ MOVING_AVERAGE_DECAY = 0.99
 
 # 模型保存的路径和文件名。
 MODEL_SAVE_PATH = "logs/log_async"
-DATA_PATH = "../../Data_sets/MNIST_data"
+DATA_PATH = "../../Datasets/MNIST_data"
 
 FLAGS = tf.app.flags.FLAGS
 
