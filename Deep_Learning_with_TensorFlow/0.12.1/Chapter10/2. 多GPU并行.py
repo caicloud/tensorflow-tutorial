@@ -16,15 +16,15 @@ MOVING_AVERAGE_DECAY = 0.99
 N_GPU = 4
 
 # 定义日志和模型输出的路径。
-MODEL_SAVE_PATH = "/path/to/logs_and_models/"
+MODEL_SAVE_PATH = "logs_and_models/"
 MODEL_NAME = "model.ckpt"
-DATA_PATH = "/path/to/data.tfrecords" 
+DATA_PATH = "output.tfrecords" 
 
 # 定义输入队列得到训练数据，具体细节可以参考第七章。
 def get_input():
     filename_queue = tf.train.string_input_producer([DATA_PATH]) 
     reader = tf.TFRecordReader()
-	_, serialized_example = reader.read(filename_queue)
+    _, serialized_example = reader.read(filename_queue)
 
 	# 定义数据解析格式。
     features = tf.parse_single_example(
@@ -44,7 +44,7 @@ def get_input():
     # 定义输入队列并返回。
     min_after_dequeue = 10000
     capacity = min_after_dequeue + 3 * BATCH_SIZE
-	return tf.train.shuffle_batch(
+    return tf.train.shuffle_batch(
     	[retyped_image, label], 
     	batch_size=BATCH_SIZE, 
     	capacity=capacity, 
@@ -52,9 +52,9 @@ def get_input():
 
 # 定义损失函数。
 def get_loss(x, y_, regularizer, scope):
-	y = mnist_inference.inference(x, regularizer)
-	cross_entropy = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(y, y_))
-	regularization_loss = tf.add_n(tf.get_collection('losses', scope))
+    y = mnist_inference.inference(x, regularizer)
+    cross_entropy = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(y, y_))
+    regularization_loss = tf.add_n(tf.get_collection('losses', scope))
     loss = cross_entropy + regularization_loss
     return loss
 
@@ -82,7 +82,7 @@ def average_gradients(tower_grads):
 # 主训练过程。
 def main(argv=None): 
     # 将简单的运算放在CPU上，只有神经网络的训练过程放在GPU上。
-	with tf.Graph().as_default(), tf.device('/cpu:0'):
+    with tf.Graph().as_default(), tf.device('/cpu:0'):
  		
  		# 定义基本的训练过程
         x, y_ = get_input()
@@ -110,12 +110,12 @@ def main(argv=None):
         grads = average_gradients(tower_grads)
         for grad, var in grads:
             if grad is not None:
-            	tf.histogram_summary('gradients_on_average/%s' % var.op.name, grad)
+            	tf.summary.histogram('gradients_on_average/%s' % var.op.name, grad)
 
         # 使用平均梯度更新参数。
         apply_gradient_op = opt.apply_gradients(grads, global_step=global_step)
         for var in tf.trainable_variables():
-            tf.histogram_summary(var.op.name, var)
+            tf.summary.histogram(var.op.name, var)
 
         # 计算变量的滑动平均值。
         variable_averages = tf.train.ExponentialMovingAverage(MOVING_AVERAGE_DECAY, global_step)
@@ -123,16 +123,16 @@ def main(argv=None):
         # 每一轮迭代需要更新变量的取值并更新变量的滑动平均值。
         train_op = tf.group(apply_gradient_op, variables_averages_op)
 
-        saver = tf.train.Saver(tf.all_variables())
-        summary_op = tf.merge_all_summaries()        
-        init = tf.initialize_all_variables()
+        saver = tf.train.Saver(tf.global_variables())
+        summary_op = tf.summary.merge_all()        
+        init = tf.global_variables_initializer()
         with tf.Session(config=tf.ConfigProto(
                 allow_soft_placement=True, log_device_placement=True)) as sess:
             # 初始化所有变量并启动队列。
             init.run()
             coord = tf.train.Coordinator()
             threads = tf.train.start_queue_runners(sess=sess, coord=coord)
-            summary_writer = tf.train.SummaryWriter(MODEL_SAVE_PATH, sess.graph)
+            summary_writer = tf.summary.FileWriter(MODEL_SAVE_PATH, sess.graph)
 
             for step in range(TRAINING_STEPS):
                 # 执行神经网络训练操作，并记录训练操作的运行时间。
