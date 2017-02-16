@@ -13,7 +13,7 @@ REGULARAZTION_RATE = 0.0001
 TRAINING_STEPS = 10000
 MOVING_AVERAGE_DECAY = 0.99 
 MODEL_SAVE_PATH = "logs/log_sync"
-DATA_PATH = "../../Datasets/MNIST_data"
+DATA_PATH = "../../datasets/MNIST_data"
 
 
 # 和异步模式类似的设置flags。

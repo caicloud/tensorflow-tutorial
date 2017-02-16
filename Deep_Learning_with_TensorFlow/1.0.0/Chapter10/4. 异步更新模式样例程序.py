@@ -14,8 +14,8 @@ TRAINING_STEPS = 1000
 MOVING_AVERAGE_DECAY = 0.99
 
 # 模型保存的路径和文件名。
-MODEL_SAVE_PATH = "/Users/ymx/Desktop/MNIST_data/log"
-DATA_PATH = "/Users/ymx/Desktop/MNIST_data/data"
+MODEL_SAVE_PATH = "logs/log_async"
+DATA_PATH = "../../datasets/MNIST_data"
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -40,7 +40,7 @@ def build_model(x, y_, is_chief):
     global_step = tf.Variable(0, trainable=False)
 
     # 计算损失函数并定义反向传播过程。
-    cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(y, tf.argmax(y_, 1))
+    cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=y, labels=tf.argmax(y_, 1))
     cross_entropy_mean = tf.reduce_mean(cross_entropy)
     loss = cross_entropy_mean + tf.add_n(tf.get_collection('losses'))
     learning_rate = tf.train.exponential_decay(
@@ -89,7 +89,6 @@ def main(argv=None):
         summary_op = tf.summary.merge_all()
         # 定义变量初始化操作。
         init_op = tf.global_variables_initializer()
-        summary_writer = tf.summary.FileWriter
         # 通过tf.train.Supervisor管理训练深度学习模型时的通用功能。
         sv = tf.train.Supervisor(
             is_chief=is_chief,
@@ -97,14 +96,13 @@ def main(argv=None):
             init_op=init_op,
             summary_op=summary_op,
             saver=saver,
-            summary_writer=tf.summary.FileWriter
             global_step=global_step,
             save_model_secs=60,
             save_summaries_secs=60)
 
         sess_config = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
         # 通过tf.train.Supervisor生成会话。
-        sess = sv.prepare_or_wait_for_session(server.target, config=sess_config) ###stucked####
+        sess = sv.prepare_or_wait_for_session(server.target, config=sess_config)
 
         step = 0
         start_time = time.time()

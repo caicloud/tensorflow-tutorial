@@ -12,8 +12,8 @@ LEARNING_RATE_DECAY = 0.99
 REGULARAZTION_RATE = 0.0001
 TRAINING_STEPS = 10000
 MOVING_AVERAGE_DECAY = 0.99 
-MODEL_SAVE_PATH = "/Users/ymx/Desktop/MNIST_data/log2"
-DATA_PATH = "/Users/ymx/Desktop/MNIST_data/data"
+MODEL_SAVE_PATH = "logs/log_sync"
+DATA_PATH = "../../datasets/MNIST_data"
 
 
 # 和异步模式类似的设置flags。
@@ -38,7 +38,7 @@ def build_model(x, y_, n_workers, is_chief):
     variable_averages = tf.train.ExponentialMovingAverage(MOVING_AVERAGE_DECAY, global_step)
     variables_averages_op = variable_averages.apply(tf.trainable_variables())
 
-    cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(y, tf.argmax(y_, 1))
+    cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=y, labels=tf.argmax(y_, 1))
     cross_entropy_mean = tf.reduce_mean(cross_entropy)
     loss = cross_entropy_mean + tf.add_n(tf.get_collection('losses'))
     learning_rate = tf.train.exponential_decay(
@@ -48,8 +48,7 @@ def build_model(x, y_, n_workers, is_chief):
     opt = tf.train.SyncReplicasOptimizer(
         tf.train.GradientDescentOptimizer(learning_rate),
         replicas_to_aggregate=n_workers,
-        total_num_replicas=n_workers,
-        replica_id=FLAGS.task_id)
+        total_num_replicas=n_workers)
 
     train_op = opt.minimize(loss, global_step=global_step)     
     if is_chief:
