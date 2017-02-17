@@ -16,9 +16,9 @@ MOVING_AVERAGE_DECAY = 0.99
 N_GPU = 4
 
 # 定义日志和模型输出的路径。
-MODEL_SAVE_PATH = "/path/to/logs_and_models/"
+MODEL_SAVE_PATH = "logs_and_models/"
 MODEL_NAME = "model.ckpt"
-DATA_PATH = "/path/to/data.tfrecords" 
+DATA_PATH = "output.tfrecords" 
 
 # 定义输入队列得到训练数据，具体细节可以参考第七章。
 def get_input():
@@ -51,10 +51,11 @@ def get_input():
     	min_after_dequeue=min_after_dequeue)
 
 # 定义损失函数。
-def get_loss(x, y_, regularizer, scope):
-	y = mnist_inference.inference(x, regularizer)
-	cross_entropy = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(y, y_))
-	regularization_loss = tf.add_n(tf.get_collection('losses', scope))
+def get_loss(x, y_, regularizer, scope, reuse_variables=None):
+    with tf.variable_scope(tf.get_variable_scope(), reuse=reuse_variables):
+        y = mnist_inference.inference(x, regularizer)
+    cross_entropy = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(y, y_))
+    regularization_loss = tf.add_n(tf.get_collection('losses', scope))
     loss = cross_entropy + regularization_loss
     return loss
 
@@ -69,7 +70,7 @@ def average_gradients(tower_grads):
         for g, _ in grad_and_vars:
             expanded_g = tf.expand_dims(g, 0)
             grads.append(expanded_g)
-        grad = tf.concat(0, grads)
+        grad = tf.concat(grads, 0)
         grad = tf.reduce_mean(grad, 0)
 
         v = grad_and_vars[0][1]
@@ -95,14 +96,14 @@ def main(argv=None):
         opt = tf.train.GradientDescentOptimizer(learning_rate)
         
         tower_grads = []
-
+        reuse_variables = False
         # 将神经网络的优化过程跑在不同的GPU上。
         for i in range(N_GPU):
             # 将优化过程指定在一个GPU上。
             with tf.device('/gpu:%d' % i):
                 with tf.name_scope('GPU_%d' % i) as scope:
-                    cur_loss = get_loss(x, y_, regularizer, scope)
-                    tf.get_variable_scope().reuse_variables()
+                    cur_loss = get_loss(x, y_, regularizer, scope, reuse_variables)
+                    reuse_variables = True
                     grads = opt.compute_gradients(cur_loss)
                     tower_grads.append(grads)
         
@@ -119,7 +120,8 @@ def main(argv=None):
 
         # 计算变量的滑动平均值。
         variable_averages = tf.train.ExponentialMovingAverage(MOVING_AVERAGE_DECAY, global_step)
-        variables_averages_op = variable_averages.apply(tf.trainable_variables())
+        variables_to_average = (tf.trainable_variables() +tf.moving_average_variables())
+        variables_averages_op = variable_averages.apply(variables_to_average)
         # 每一轮迭代需要更新变量的取值并更新变量的滑动平均值。
         train_op = tf.group(apply_gradient_op, variables_averages_op)
 
