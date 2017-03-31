@@ -231,10 +231,34 @@ class DistTensorflowRunner(object):
 
         # call train-after hook
         if self._after_train_hook is not None:
-            self.after_train(sess, True)
+            self._after_train_hook(sess)
 
         # export trained model
         if self._model_exporter is not None:
             self._model_exporter.save(sess)
 
+        # 评测训练后的模型
+        if self._model_fn_handler.model_metric_ops is not None:
+            for (metric_key, evaluate_fn) in self._model_fn_handler.model_metric_ops.items():
+                metric_val = _call_metric_evaluate_fn(sess, evaluate_fn)
+                print("[Evaluation metrics] {0}: {1}".format(metric_key, metric_val))
+                
         sv.stop()
+
+def _call_metric_evaluate_fn(session, evaluate_fn):
+    """计算模型某个度量值。
+    
+    参数：
+    - session：tf.Session 对象。
+    - evaluate_fn：模型度量值的计算函数。
+    返回值：
+    float 类型值，模型的某个度量值。
+    """
+    metric_val = 0.0
+    try:
+        if evaluate_fn is not None and callable(evaluate_fn):
+            metric_val = float(evaluate_fn(session))
+    except Exception, e:
+        # TODO：暂时不记录计算失败的情况。
+        pass
+    return metric_val
