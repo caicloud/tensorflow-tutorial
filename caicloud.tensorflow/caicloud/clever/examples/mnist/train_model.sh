@@ -16,5 +16,6 @@
 # ==============================================================================
 
 rm -rf /tmp/caicloud-dist-tf
+rm -rf /tmp/saved_model/mnist
 
-python mnist_export.py --max_steps=2000 --work_dir="/tmp/mnist-data" --export_dir="/tmp/saved_model/mnist"
+python mnist_export.py --max_steps=2000 --data_dir="/tmp/mnist-data" --export_dir="/tmp/saved_model/mnist"

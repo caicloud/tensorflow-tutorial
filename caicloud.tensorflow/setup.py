@@ -27,7 +27,7 @@ with open(path.join(here, 'VERSION'), encoding='utf-8') as f:
     VERSION = f.read()
 
 REQUIRED_PACKAGES = [
-    'tensorflow >= 0.12.0',
+    'tensorflow >= 1.0.0',
     'grpcio >= 1.0.4',
     'googleapis-common-protos >= 1.5.0',
 ]
@@ -38,7 +38,7 @@ setup(
     description='Caicloud TensorFlow as a Service (TaaS) dev environment',
     long_description=long_description,
     author='Caicloud Inc.',
-    author_email='info@caicloud.io',
+    author_email='taas@caicloud.io',
     url='https://caicloud.io/',
     license='Apache 2.0',
     install_requires=REQUIRED_PACKAGES,
