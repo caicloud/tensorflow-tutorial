@@ -35,6 +35,8 @@ train_op = None
 global_step = None
 
 def model_fn(sync, num_replicas):
+    # 这些变量在后续的训练操作函数 train_fn() 中会使用到，
+    # 所以这里使用了 global 变量。
     global input_images, loss, labels, optimizer, train_op, accuracy
     global mnist, global_step
 
@@ -123,8 +125,8 @@ def gen_init_fn():
     return InitAssignFn
     
 def train_fn(session, num_global_step):
-    # global local_step, input_images, labels, accuracy
-    # global mnist, train_op, loss, global_step
+    global local_step, input_images, labels, accuracy
+    global mnist, train_op, loss, global_step
     global local_step
     
     start_time = time.time()
