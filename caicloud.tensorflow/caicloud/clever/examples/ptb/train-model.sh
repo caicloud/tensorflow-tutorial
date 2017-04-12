@@ -18,7 +18,7 @@
 rm -rf /tmp/ptb_saved_model
 rm -rf /tmp/ptb
 
-python ptb_platform.py \
+python ptb_caicloud_taas.py \
        --max_steps=10000 \
        --save_checkpoints_secs=3 \
        --save_summaries_secs=3 \
