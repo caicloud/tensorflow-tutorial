@@ -31,12 +31,29 @@ def run():
     print("Loading ptb data...")
     train_data, valid_data, test_data, _ = reader.ptb_raw_data(FLAGS.data_path)
 
-    inputs = {
-        'input': tf.contrib.util.make_tensor_proto(test_data[0], shape=[1,1]),
-    }
-    outputs = client.call_predict(inputs)
-    result = tf.contrib.util.make_ndarray(outputs["logits"])
-    print('logits: {0}'.format(result))
+    # 这里 PTB 的测试数据集的前 10 个单词来假设收到了一个单词序列，来预测第 11 个单词。
+    state = {}
+    logits = None
+    for i in range(10):
+        inputs = {
+            'input': tf.contrib.util.make_tensor_proto(test_data[i], shape=[1,1])
+        }
+
+        # 对于序列的第一个单词，采用模型初始状态。
+        # 对于非第一个单词，使用模型上一时刻的状态。
+        if i > 0:
+            for key in state:
+                inputs[key] = tf.contrib.util.make_tensor_proto(state[key])
+            
+        outputs = client.call_predict(inputs)
+
+        # 模型的输出列表中，除了 logits 外，其他都是模型的状态。
+        for key in outputs:
+            if key == "logits":
+                logits = tf.contrib.util.make_ndarray(outputs[key])
+            else:
+                state[key] = tf.contrib.util.make_ndarray(outputs[key])
+    print('logits: {0}'.format(logits))
 
 if __name__ == '__main__':
     run()

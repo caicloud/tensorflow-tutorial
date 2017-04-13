@@ -89,10 +89,26 @@ def model_fn(sync, num_replicas):
     # logits 作为导出模型的输入和输出。
     model_export_spec = None
     if FLAGS.save_path:
+        # 语言模型的每个时刻的输出与上一个时刻的状态还有关系。
+        # 所以这里到处模型时，设置了模型输入 input_tensors 除了 input_data 还需要包括
+        # 模型的 initial_state，而模型输出 output_tensors 除了 logits 还包括模型
+        # final_state。
+        # 模型 Serving 处理实时数据时需要获取上一个时刻的状态值，然后再作为下一时刻的
+        # 输入值。
+        input_tensors = {"input": mtest.input_data}
+        for i, (c, h) in enumerate(mtest.initial_state):
+            input_tensors[c.name] = c
+            input_tensors[h.name] = h
+            
+        output_tensors = {"logits": mtest.logits}
+        for i, (c, h) in enumerate(mtest.final_state):
+            output_tensors[c.name] = c
+            output_tensors[h.name] = h
+                          
         model_export_spec = model_exporter.ModelExportSpec(
             export_dir=FLAGS.save_path,
-            input_tensors={"input": mtest.input_data},
-            output_tensors={"logits": mtest.logits})
+            input_tensors=input_tensors,
+            output_tensors=output_tensors)
         
     return dist_base.ModelFnHandler(
         model_export_spec=model_export_spec,
