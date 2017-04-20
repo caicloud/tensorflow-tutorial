@@ -18,10 +18,10 @@
 rm -rf /tmp/ptb_saved_model
 rm -rf /tmp/ptb
 
+export TF_MAX_STEPS=10000
+export TF_LOGDIR=/tmp/ptb
+export TF_SAVE_CHECKPOINTS_SECS=60
+export TF_SAVE_SUMMARIES_STEPS=10
 python ptb_caicloud_taas.py \
-       --max_steps=10000 \
-       --save_checkpoints_secs=3 \
-       --save_summaries_secs=3 \
-       --logdir=/tmp/ptb \
        --data_path=./simple-examples/data \
        --save_path=/tmp/ptb_saved_model
