@@ -20,19 +20,19 @@ import time
 from datetime import datetime
 import tensorflow as tf
 from caicloud.clever.tensorflow import model_exporter
+import os
 
-tf.app.flags.DEFINE_integer("max_steps",
-                            1,
-                            "maximum train steps.")
-tf.app.flags.DEFINE_string("logdir",
-                           "/tmp/caicloud-dist-tf",
-                           "saves checkpoints and summaries directory path.")
-tf.app.flags.DEFINE_integer("save_checkpoints_secs", 60,
-                            "save checkpoints after every special seconds")
-tf.app.flags.DEFINE_integer("save_summaries_secs", 120,
-                            "save summaries after every special seconds")
+class RunConfig(object):
+    def __init__(self):
+        self.is_chief = True
+        self.use_gpu = False
+        self.sync = False
+        self.max_steps = int(os.getenv("TF_MAX_STEPS", "1"))
+        self.logdir = os.getenv("TF_LOGDIR", "/tmp/caicloud-dist-tf")
+        self.save_checkpoints_secs = int(os.getenv("TF_SAVE_CHECKPOINTS_SECS", "600"))
+        self.save_summaries_steps = int(os.getenv("TF_SAVE_SUMMARIES_STEPS", "100"))
 
-FLAGS = tf.app.flags.FLAGS
+cfg = RunConfig()
 
 class ModelFnHandler(object):
     """model_fn 函数返回的一些模型信息。"""
@@ -196,7 +196,7 @@ class DistTensorflowRunner(object):
             if self._gen_init_fn is not None:
                 init_fn = self._gen_init_fn()
 
-        logdir = FLAGS.logdir
+        logdir = cfg.logdir
         sv = tf.train.Supervisor(
             logdir=logdir,
             graph=g,
@@ -204,8 +204,8 @@ class DistTensorflowRunner(object):
             summary_op=summary_op,
             saver=saver,
             global_step=self._global_step,
-            save_model_secs=FLAGS.save_checkpoints_secs,
-            save_summaries_secs=FLAGS.save_summaries_secs,
+            save_model_secs=cfg.save_checkpoints_secs,
+            save_summaries_secs=cfg.save_summaries_steps,
             init_fn=init_fn)
         # Get a TensorFlow session managed by the supervisor.
         sess = sv.prepare_or_wait_for_session('')
@@ -218,7 +218,7 @@ class DistTensorflowRunner(object):
         step = 0
         while not sv.should_stop():
             step = sess.run(self._global_step)
-            if step > FLAGS.max_steps:
+            if step > cfg.max_steps:
                 break
             should_stop = train_fn(sess, step)
             if should_stop:
