@@ -116,13 +116,26 @@ def gen_init_fn():
         checkpoint_path = checkpoint_path
     print('warm-start from checkpoint {0}'.format(checkpoint_path))
 
-    # Create an initial assignment function.
+    # 定义 tf.train.Saver 会修改 TensorFlow 的 Graph 结构，
+    # 而当 Base 框架调用自定义初始化函数 init_from_checkpoint 的时候，
+    # TensorFlow 模型的 Graph 结构已经变成 finalized，不再允许修改 Graph 结构。
+    # 所以，这个定义必须放在  init_from_checkpoint 函数外面。
     saver = tf.train.Saver(tf.trainable_variables())
-    def InitAssignFn(sess):
+
+    def init_from_checkpoint(scaffold, sess):
+        """执行自定义初始化的函数。
+
+        TaaS 平台会优先从设置的日志保存路径中获取最新的 checkpoint 来 restore 模型参数，
+        如果日志保存路径中找不到 checkpoint 文件，才会调用本函数来进行模型初始化。
+
+        本函数必须接收两个参数：
+          - scafford: tf.train.Scaffold 对象；
+          - sess: tf.Session 对象。
+        """
         saver.restore(sess, checkpoint_path)
         print('Accuracy for restored model:')
         compute_accuracy(sess)
-    return InitAssignFn
+    return init_from_checkpoint
     
 def train_fn(session, num_global_step):
     global local_step, input_images, labels, accuracy

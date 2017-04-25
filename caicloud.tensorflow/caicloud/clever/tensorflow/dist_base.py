@@ -187,6 +187,7 @@ class DistTensorflowRunner(object):
         g = tf.Graph()
         with g.as_default():
             self._call_model_fn()
+            
 
             saver = tf.train.Saver()
             summary_op = tf.summary.merge_all()
@@ -194,11 +195,16 @@ class DistTensorflowRunner(object):
 
             init_fn = None
             if self._gen_init_fn is not None:
-                init_fn = self._gen_init_fn()
+                customed_init_fn = self._gen_init_fn()
+                def init_fn(sess):
+                    scaffold = tf.train.Scaffold(
+                        init_op = init_op,
+                        saver = saver
+                    )
+                    customed_init_fn(scaffold, sess)
 
-        logdir = cfg.logdir
         sv = tf.train.Supervisor(
-            logdir=logdir,
+            logdir=cfg.logdir,
             graph=g,
             init_op=init_op,
             summary_op=summary_op,
@@ -214,7 +220,6 @@ class DistTensorflowRunner(object):
         print("Training begins @ {0}".format(str(datetime.now())))
 
         # Use the session to train the graph.
-        sess.run(init_op)
         step = 0
         while not sv.should_stop():
             step = sess.run(self._global_step)

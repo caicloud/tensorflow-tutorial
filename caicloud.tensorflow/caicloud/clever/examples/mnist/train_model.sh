@@ -19,7 +19,7 @@ rm -rf /tmp/caicloud-dist-tf
 rm -rf /tmp/saved_model/mnist
 
 export TF_MAX_STEPS=3000
-export TF_LOGDIR=/tmp/mnist-log
+export TF_LOGDIR=/tmp/mnist-log1
 export TF_SAVE_CHECKPOINTS_SECS=60
 export TF_SAVE_SUMMARIES_STEPS=10
-python mnist_export.py --data_dir="/tmp/mnist-data" --export_dir="/tmp/saved_model/mnist"
+python mnist_export.py --checkpoint_dir=/tmp/mnist-log  --data_dir="/tmp/mnist-data" --export_dir="/tmp/saved_model/mnist"
