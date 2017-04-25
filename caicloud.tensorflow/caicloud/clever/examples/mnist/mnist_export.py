@@ -33,12 +33,14 @@ loss = None
 optimizer = None
 train_op = None
 global_step = None
+_summary_op = None
+_summary_writer = None
 
 def model_fn(sync, num_replicas):
     # 这些变量在后续的训练操作函数 train_fn() 中会使用到，
     # 所以这里使用了 global 变量。
     global input_images, loss, labels, optimizer, train_op, accuracy
-    global mnist, global_step
+    global mnist, global_step, _summary_op, _summary_writer
 
     # 构建推理模型
     input_images = tf.placeholder(tf.float32, [None, 784], name='image')
@@ -54,6 +56,7 @@ def model_fn(sync, num_replicas):
     labels = tf.placeholder(tf.float32, [None, 10], name='labels')
     cross_entropy = tf.reduce_mean(
         tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=labels))
+    tf.summary.scalar("cross_entropy", cross_entropy)
     loss = tf.reduce_mean(cross_entropy, name='loss')
     tf.add_to_collection(tf.GraphKeys.LOSSES, loss)
         
@@ -68,6 +71,12 @@ def model_fn(sync, num_replicas):
             name="mnist_sync_replicas")
 
     train_op = optimizer.minimize(cross_entropy, global_step=global_step)
+
+    # 自定义计算模型 summary 信息的 Operation，
+    # 并定义一个 FileWriter 用于保存模型 summary 信息。
+    # 其中  dist_base.cfg.logdir 是 TaaS 平台上设置的训练日志路径参数。
+    _summary_op = tf.summary.merge_all()
+    _summary_writer = tf.summary.FileWriter(dist_base.cfg.logdir)
         
     # Test trained model
     correct_prediction = tf.equal(tf.argmax(logits, 1),
@@ -89,12 +98,17 @@ def model_fn(sync, num_replicas):
     model_metric_ops = {
         "accuracy": accuracy_evalute_fn
     }
-    
+
+    # 因为模型中需要计算 tf.summary.scalar(cross_entropy)，而该 summary 的计算需要
+    # feed 设置 _input_images 和 _labels，所以这里将 summary_op 设置成 None，将关闭
+    # TaaS 的自动计算和保存模型 summary 信息机制。在 train_op 函数中自己来计算并收集
+    # 模型 Graph 的 summary 信息。
     return dist_base.ModelFnHandler(
         global_step=global_step,
         optimizer=optimizer,
         model_metric_ops = model_metric_ops,
-        model_export_spec=model_export_spec)
+        model_export_spec=model_export_spec,
+        summary_op=None)
     
 def gen_init_fn():
     """获取自定义初始化函数。
@@ -136,24 +150,34 @@ def gen_init_fn():
         print('Accuracy for restored model:')
         compute_accuracy(sess)
     return init_from_checkpoint
-    
+
+_last_summary_step = 0
 def train_fn(session, num_global_step):
     global local_step, input_images, labels, accuracy
     global mnist, train_op, loss, global_step
-    global local_step
+    global _summary_op, _summary_writer, _last_summary_step
     
     start_time = time.time()
     local_step += 1
     batch_xs, batch_ys = mnist.train.next_batch(100)
     feed_dict = {input_images: batch_xs,
                  labels: batch_ys}
-    _, loss_value, np_global_step = session.run(
-        [train_op, loss, global_step],
+    _, loss_value, np_global_step, summary_str = session.run(
+        [train_op, loss, global_step, _summary_op],
         feed_dict=feed_dict)
     duration = time.time() - start_time
     if local_step % 50 == 0:
         print('Step {0}: loss = {1:0.2f} ({2:0.3f} sec), global step: {3}.'.format(
             local_step, loss_value, duration, np_global_step))
+
+    # 每隔固定训练轮数计算保存一次模型 summary 信息
+    # 通过 dist_base.cfg.save_summaies_steps 获取在 TaaS 平台上设置的
+    # "自动保存 summaries 日志间隔"参数值。
+    if (np_global_step - _last_summary_step >= dist_base.cfg.save_summaries_steps):
+        _summary_writer.add_summary(summary_str, np_global_step)
+        _summary_writer.flush()
+        _last_summary_step = np_global_step
+       
     if local_step % 1000 == 0:
         print("Accuracy for validation data: {0:0.3f}".format(
             session.run(
@@ -166,6 +190,9 @@ def train_fn(session, num_global_step):
         
         
 def after_train_hook(session):
+    global _summary_writer
+    _summary_writer.close()
+    
     print("Train done.")
     print("Accuracy for test data: {0:0.3f}".format(
         session.run(

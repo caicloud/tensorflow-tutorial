@@ -22,6 +22,8 @@ import tensorflow as tf
 from caicloud.clever.tensorflow import model_exporter
 import os
 
+_USE_DEFAULT = 0
+
 class RunConfig(object):
     def __init__(self):
         self.is_chief = True
@@ -41,7 +43,8 @@ class ModelFnHandler(object):
                  global_step=None,
                  optimizer=None,
                  model_export_spec=None,
-                 model_metric_ops=None):
+                 model_metric_ops=None,
+                 summary_op=_USE_DEFAULT):
         """创建一个 ModelFnHandler 对象。
 
         分布式 TensorFlow 运行器 DistTensorflowRunner 的模型构建方法 model_fn 的返回值
@@ -73,6 +76,8 @@ class ModelFnHandler(object):
         if (model_metric_ops is not None) and (not isinstance(model_metric_ops, dict)):
             raise ValueError('model_export_spec must be a None or dict.')
         self._model_metric_ops = model_metric_ops
+        
+        self._summary_op = summary_op
 
     @property
     def global_step(self):
@@ -89,6 +94,10 @@ class ModelFnHandler(object):
     @property
     def model_metric_ops(self):
         return self._model_metric_ops
+
+    @property
+    def summary_op(self):
+        return self._summary_op
 
 
 class DistTensorflowRunner(object):
@@ -170,6 +179,8 @@ class DistTensorflowRunner(object):
         if model_fn_handler.model_export_spec is not None:
             self._model_exporter = model_exporter.ModelExporter(model_fn_handler.model_export_spec)
 
+        return model_fn_handler
+
     
     def run(self, train_fn):
         """执行分布式 TensorFlow 训练。
@@ -186,11 +197,13 @@ class DistTensorflowRunner(object):
 
         g = tf.Graph()
         with g.as_default():
-            self._call_model_fn()
+            model_fn_handler = self._call_model_fn()
             
 
             saver = tf.train.Saver()
-            summary_op = tf.summary.merge_all()
+            summary_op = model_fn_handler.summary_op
+            if summary_op == _USE_DEFAULT:
+                summary_op = tf.summary.merge_all()
             init_op = tf.global_variables_initializer()
 
             init_fn = None
