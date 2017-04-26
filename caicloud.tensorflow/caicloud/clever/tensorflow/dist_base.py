@@ -209,12 +209,13 @@ class DistTensorflowRunner(object):
             init_fn = None
             if self._gen_init_fn is not None:
                 customed_init_fn = self._gen_init_fn()
-                def init_fn(sess):
-                    scaffold = tf.train.Scaffold(
-                        init_op = init_op,
-                        saver = saver
-                    )
-                    customed_init_fn(scaffold, sess)
+                if customed_init_fn is not None:
+                    def init_fn(sess):
+                        scaffold = tf.train.Scaffold(
+                            init_op = init_op,
+                            saver = saver
+                        )
+                        customed_init_fn(scaffold, sess)
 
         sv = tf.train.Supervisor(
             logdir=cfg.logdir,
