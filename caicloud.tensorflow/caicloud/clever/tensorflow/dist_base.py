@@ -120,7 +120,7 @@ class DistTensorflowRunner(object):
           更新机制，需要使用 `tf.train.SyncReplicasOptimizer` 来对平常 `Optimizer` 进行
           封装，例如：
           ```
-          optimizer = tf.train.AdagradOptimizer(0.01);
+          optimizer = tf.train.AdagradOptimizer(0.01)
           if sync:
               num_workers = num_replicas
               optimizer = tf.train.SyncReplicasOptimizer(
