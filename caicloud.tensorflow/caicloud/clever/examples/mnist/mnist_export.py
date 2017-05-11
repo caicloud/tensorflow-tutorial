@@ -60,7 +60,7 @@ def model_fn(sync, num_replicas):
     tf.add_to_collection(tf.GraphKeys.LOSSES, _loss)
         
     # Create optimizer to compute gradient
-    optimizer = tf.train.AdagradOptimizer(0.01);
+    optimizer = tf.train.AdagradOptimizer(0.01)
     if sync:
         num_workers = num_replicas
         optimizer = tf.train.SyncReplicasOptimizer(
