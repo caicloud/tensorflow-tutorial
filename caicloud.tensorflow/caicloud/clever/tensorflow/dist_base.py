@@ -29,6 +29,10 @@ class RunConfig(object):
         self.is_chief = True
         self.use_gpu = False
         self.sync = False
+        self.num_workers = 1
+        self.num_ps = 0
+        self.task_type = "worker"
+        self.task_index = 0
         self.max_steps = int(os.getenv("TF_MAX_STEPS", "1"))
         self.logdir = os.getenv("TF_LOGDIR", "/tmp/caicloud-dist-tf")
         self.save_checkpoints_secs = int(os.getenv("TF_SAVE_CHECKPOINTS_SECS", "600"))
