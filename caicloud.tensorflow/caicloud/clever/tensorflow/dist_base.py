@@ -21,6 +21,7 @@ from datetime import datetime
 import tensorflow as tf
 from caicloud.clever.tensorflow import model_exporter
 import os
+import tempfile
 
 _USE_DEFAULT = 0
 
@@ -34,7 +35,10 @@ class RunConfig(object):
         self.task_type = "worker"
         self.task_index = 0
         self.max_steps = int(os.getenv("TF_MAX_STEPS", "1"))
-        self.logdir = os.getenv("TF_LOGDIR", "/tmp/caicloud-dist-tf")
+        self.logdir = os.getenv("TF_LOGDIR", None)
+        if self.logdir is None:
+            self.logdir = tempfile.mkdtemp()
+            print("WARNING: Using temporary folder as log directory: {}".format(self.logdir))
         self.save_checkpoints_secs = int(os.getenv("TF_SAVE_CHECKPOINTS_SECS", "600"))
         self.save_summaries_steps = int(os.getenv("TF_SAVE_SUMMARIES_STEPS", "100"))
 
