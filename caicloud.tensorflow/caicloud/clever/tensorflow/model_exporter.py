@@ -36,8 +36,9 @@ class ModelExportSpec(object):
 
     def __init__(self,
                  export_dir,
-                 input_tensors,
-                 output_tensors,
+                 input_tensors=None,
+                 output_tensors=None,
+                 features=None,
                  assets_collection=None,
                  legacy_init_op=None,
                  main_op=None):
@@ -60,17 +61,9 @@ class ModelExportSpec(object):
             raise ValueError('export_dir must be a str.')
         self._export_dir = export_dir
 
-        if input_tensors is None:
-            raise ValueError('input_tensors cannot be None.')
-        if not isinstance(input_tensors, dict):
-            raise ValueError('input_tensors must be a map of string to tensor info.')
         self._input_tensors = input_tensors
-
-        if output_tensors is None:
-            raise ValueError('output_tensors cannot be None.')
-        if not isinstance(output_tensors, dict):
-            raise ValueError('output_tensors must be a map of string to tensor info.')
         self._output_tensors = output_tensors
+        self._features = features
 
         self._assets_collection = assets_collection
         self._legacy_init_op = legacy_init_op
@@ -87,6 +80,10 @@ class ModelExportSpec(object):
     @property
     def output_tensors(self):
         return self._output_tensors
+
+    @property
+    def features(self):
+        return self._features
 
     @property
     def assets_collection(self):
