@@ -39,3 +39,26 @@ Eval RMSE at round 18000 is: 0.915674805641
 Eval RMSE at round 20000 is: 0.91452050209
 Eval RMSE at round 22000 is: 0.915164649487
 ```
+
+
+## TaaS 平台 Serving request
+```
+{
+  "inputs": {
+    "user": {
+      "dtype": "DT_INT32",
+      "tensorShape": {"dim": [ {"size": "1"} ] },
+      "intVal": [
+        2
+      ]
+    },
+    "item": {
+      "dtype": "DT_INT32",
+      "tensorShape": {"dim": [ {"size": "1"} ] },
+      "intVal": [
+        3
+      ]
+    }
+  }
+}
+```
