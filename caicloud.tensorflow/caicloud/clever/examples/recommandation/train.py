@@ -5,24 +5,26 @@ import time
 import numpy as np
 import tensorflow as tf
 import pandas as pd
+import os
 
 from caicloud.clever.tensorflow import dist_base
 from caicloud.clever.tensorflow import model_exporter
 
-tf.app.flags.DEFINE_string("export_dir",
-                           "/tmp/saved_model/movie",
-                           "model export directory path.")
+tf.app.flags.DEFINE_string("export_dir", "/tmp/saved_model/movie", "model export directory path.")
+tf.app.flags.DEFINE_string("data_dir", "/caicloud/admin/hengfengPOC/data", "path where data is located.")
 
-tf.app.flags.DEFINE_string("batch_size", 128, "training batch size.")
-tf.app.flags.DEFINE_string("embedding_dim", 50, "embedding dimension.")
-
+tf.app.flags.DEFINE_integer("batch_size", 128, "training batch size.")
+tf.app.flags.DEFINE_integer("embedding_dim", 50, "embedding dimension.")
+tf.app.flags.DEFINE_float("learning_rate", 0.01, "learning rate.")
 FLAGS = tf.app.flags.FLAGS
+
 USER_NUM = 6040
 ITEM_NUM = 3952
 
 def get_data():
     col_names = ["user", "item", "rate", "st"]
-    df = pd.read_csv("/tmp/movielens/ml-1m/ratings.dat", sep="::", header=None, names=col_names, engine='python')
+    datafile = os.path.join(FLAGS.data_dir, "ml-1m/ratings.dat")
+    df = pd.read_csv(datafile, sep="::", header=None, names=col_names, engine='python')
     
     df["user"] -= 1
     df["item"] -= 1
@@ -96,9 +98,19 @@ def model_fn(sync, num_replicas):
     _global_step = tf.contrib.framework.get_or_create_global_step()
     
     _cost = tf.square(_infer - _rate_batch)
-    optimizer = tf.train.AdamOptimizer(0.001)
-    _train_op = optimizer.minimize(_cost, global_step=_global_step)
-
+    optimizer = tf.train.GradientDescentOptimizer(FLAGS.learning_rate)
+    
+    if sync:
+        optimizer = tf.train.SyncReplicasOptimizer(
+            optimizer,
+            replicas_to_aggregate=num_replicas,
+            total_num_replicas=num_replicas,
+            name="mnist_sync_replicas")
+        
+    gradients, variables = zip(*optimizer.compute_gradients(_cost))
+    gradients, _ = tf.clip_by_global_norm(gradients, 5.0)
+    _train_op = optimizer.apply_gradients(zip(gradients, variables), global_step=_global_step)
+       
     _rmse = tf.sqrt(tf.reduce_mean(_cost))
     
     def rmse_evalute_fn(session):
@@ -129,8 +141,11 @@ def train_fn(session, num_global_step):
     users, items, rates = next(_iter_train)            
     session.run(_train_op, feed_dict={_user_batch: users, _item_batch: items, _rate_batch: rates})
             
-    if _local_step % 2000 == 0:
-        rmse, infer, cost = session.run([_rmse, _infer, _cost], feed_dict={_user_batch: _test["user"], _item_batch: _test["item"], _rate_batch: _test["rate"]})
+    if _local_step % 200 == 0:
+        rmse, infer, cost = session.run(
+            [_rmse, _infer, _cost], 
+            feed_dict={_user_batch: _test["user"], _item_batch: _test["item"], _rate_batch: _test["rate"]})
+        
         print("Eval RMSE at round {} is: {}".format(num_global_step, rmse))
     
     _local_step += 1        
