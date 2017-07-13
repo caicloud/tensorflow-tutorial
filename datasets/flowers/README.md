@@ -5,24 +5,30 @@
 
 ## 目录
 
-<a herf="数据集下载">数据集下载</a>
-<a herf="数据集处理">数据集处理</a>
+<a href='#数据集下载'>数据集下载</a><br>
+
+<a href='#数据集处理'>数据集处理</a>
 
 
 # 数据集下载
-<a id="数据集下载"></a>
-使用如下命令即可进行下载
-'''shelll
-$ wget https://raw.githubusercontent.com/caicloud/tensorflow-tutorial/master/datasets/flowers/flowers.zip
-'''
+<a id='数据集下载'></a>
 
-<a id="数据集处理">数据集处理</a>
+使用如下命令即可进行下载
+
+```shell
+$ wget https://raw.githubusercontent.com/caicloud/tensorflow-tutorial/master/datasets/flowers/flowers.zip
+```
+
+# 数据集处理
+<a id='数据集处理'></a>
+
 使用如下命令进行相关数据处理
-'''
+
+```shell
 $ mkdir flowers
 $ mv flowers.zip flowers
 $ unzip flowers.zip
-'''
+```
 操作完成后，即可利用该数据在 Taas 深度学习平台进行 AI 解决方案的训练和测试工作
 
 
