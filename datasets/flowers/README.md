@@ -1,6 +1,6 @@
 # 花卉数据文件
 
-该文件为caicloud TaaS 样例数据集,数据集包含 roses 和 sunflower2个文件夹，包含 roses 图片627张，sunflowers 图片554张，共1181张图片， 可用来做 TaaS 深度学习平台 AI 解决方案的训练和测试,具体详情可访问<a herf="https://caicloud.io/">才云科技官网</a>
+该文件为caicloud TaaS 样例数据集,数据集包含 roses 和 sunflower2个文件夹，包含 roses 图片627张，sunflowers 图片554张，共1181张图片， 可用来做 TaaS 深度学习平台 AI 解决方案的训练和测试,具体详情可访问<a href="https://caicloud.io/">才云科技官网</a>
 
 
 ## 目录
