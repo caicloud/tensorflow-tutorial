@@ -1,0 +1,6 @@
+model_checkpoint_path: "mnist_model-29001"
+all_model_checkpoint_paths: "mnist_model-25001"
+all_model_checkpoint_paths: "mnist_model-26001"
+all_model_checkpoint_paths: "mnist_model-27001"
+all_model_checkpoint_paths: "mnist_model-28001"
+all_model_checkpoint_paths: "mnist_model-29001"
