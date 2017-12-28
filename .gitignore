@@ -1,4 +1,12 @@
 *~
 *.pyc
+Deep_Learning_with_TensorFlow/datasets/inception_v3.ckpt
+Deep_Learning_with_TensorFlow/1.4.0/Chapter05/Saved_model/*
+Deep_Learning_with_TensorFlow/1.4.0/Chapter06/train_dir/*
+Deep_Learning_with_TensorFlow/datasets/flower_processed_data.npy
+Deep_Learning_with_TensorFlow/1.4.0/Chapter05/5. MNIST\346\234\200\344\275\263\345\256\236\350\267\265/MNIST_model/*
+Deep_Learning_with_TensorFlow/1.4.0/Chapter07/output.tfrecords
+Deep_Learning_with_TensorFlow/1.4.0/Chapter07/data.tfrecords*
+Deep_Learning_with_TensorFlow/1.4.0/Chapter10/log/*
 .DS_Store
 
