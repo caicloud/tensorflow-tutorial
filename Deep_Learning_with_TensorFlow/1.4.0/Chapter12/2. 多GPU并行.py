@@ -164,7 +164,7 @@ def main(argv=None):
                     num_examples_per_step = BATCH_SIZE * N_GPU
 
                     # num_examples_per_step为本次迭代使用到的训练数据个数，
-                   # duration为运行当前训练过程使用的时间，于是平均每秒可以处理的训
+                    # duration为运行当前训练过程使用的时间，于是平均每秒可以处理的训
                     # 练数据个数为num_examples_per_step / duration。
                     examples_per_sec = num_examples_per_step / duration
 
