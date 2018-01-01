@@ -7,6 +7,10 @@ Deep_Learning_with_TensorFlow/datasets/flower_processed_data.npy
 Deep_Learning_with_TensorFlow/1.4.0/Chapter05/5. MNIST\346\234\200\344\275\263\345\256\236\350\267\265/MNIST_model/*
 Deep_Learning_with_TensorFlow/1.4.0/Chapter07/output.tfrecords
 Deep_Learning_with_TensorFlow/1.4.0/Chapter07/data.tfrecords*
+Deep_Learning_with_TensorFlow/1.4.0/Chapter07/output_test.tfrecords
+Deep_Learning_with_TensorFlow/1.4.0/Chapter07/test1.txt
+Deep_Learning_with_TensorFlow/1.4.0/Chapter07/test2.txt
+Deep_Learning_with_TensorFlow/1.4.0/Chapter08/sin.png
 Deep_Learning_with_TensorFlow/1.4.0/Chapter10/log/*
 Deep_Learning_with_TensorFlow/1.4.0/Chapter11/log/*
 .DS_Store
