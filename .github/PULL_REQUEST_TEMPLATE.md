@@ -9,7 +9,7 @@ Add your description
 Fixes #
 
 Reference to #
-<!-- 填在 Fixes，PR 合并就会关 issue。填在 Reference to 会关联 issue，不会联动关闭，caicloud/quality 请用这个。
+<!-- 填在 Fixes，PR 合并就会关 issue。填在 Reference to 会关联 issue，不会联动关闭，caicloud/quality 请用这个。-->
 
 **Special notes for your reviewer**:
 
