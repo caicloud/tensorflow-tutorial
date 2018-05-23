@@ -4,13 +4,25 @@
 
 Add your description
 
-**Which issue(s) this PR fixes** *(optional, close the issue(s) when PR gets merged)*:
+**Which issue(s) this PR is related to** *(optional, link to 3rd issue(s))*:
 
 Fixes #
+
+Reference to #
+<!-- 填在 Fixes，PR 合并就会关 issue。填在 Reference to 会关联 issue，不会联动关闭，caicloud/quality 请用这个。
 
 **Special notes for your reviewer**:
 
 /cc @your-reviewer
+
+<!-- Please answer the following questions during the code freeze, and delete this line.
+**Code freeze questions**
+
+1. What causes this PR to not be merged before code freeze?
+2. Why this PR is absolutely necessary for this version? Paste a screenshot of smoke testing docs if you could.
+3. What's the effects after merging it?
+4. Is there anyway we can skip this to not affect the overall process?
+-->
 
 **Release note**:
 <!--  Write your release note:
