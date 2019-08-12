@@ -36,9 +36,9 @@ NONE
 
 <!--  Thanks for sending a pull request! Here are some tips:
 
-1. https://github.com/caicloud/engineering/blob/master/docs/review_conventions.md  <-- what is the review process looks like
-2. https://github.com/caicloud/engineering/blob/master/docs/commit_conventions.md  <-- how to structure your git commit
-3. https://github.com/caicloud/engineering/blob/master/docs/caicloud_bot.md        <-- how to work with caicloud bot
+1. https://github.com/caicloud/engineering/blob/master/guidelines/review_conventions.md      <-- what is the review process looks like
+2. https://github.com/caicloud/engineering/blob/master/guidelines/git_commit_conventions.md  <-- how to structure your git commit
+3. https://github.com/caicloud/engineering/blob/master/guidelines/caicloud_bot.md            <-- how to work with caicloud bot
 
 Other tips from Kubernetes community:
 
