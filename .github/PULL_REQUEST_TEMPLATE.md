@@ -9,7 +9,7 @@ Add your description
 Fixes #
 
 Reference to #
-<!-- 填在 Fixes，PR 合并就会关 issue。填在 Reference to 会关联 issue，不会联动关闭，caicloud/quality 请用这个。-->
+<!-- 填在 Fixes，PR 合并就会关 issue。填在 Reference to 会关联 issue，不会联动关闭。-->
 
 **Special notes for your reviewer**:
 
@@ -40,10 +40,7 @@ NONE
 2. https://github.com/caicloud/engineering/blob/master/guidelines/git_commit_conventions.md  <-- how to structure your git commit
 3. https://github.com/caicloud/engineering/blob/master/guidelines/caicloud_bot.md            <-- how to work with caicloud bot
 
-Other tips from Kubernetes community:
+Other tips:
 
-1. If this is your first time, read our contributor guidelines https://git.k8s.io/community/contributors/devel/pull-requests.md#the-pr-submit-process and developer guide https://git.k8s.io/community/contributors/devel/development.md#development-guide
-2. If you want *faster* PR reviews, read how: https://git.k8s.io/community/contributors/devel/pull-requests.md#best-practices-for-faster-reviews
-3. Follow the instructions for writing a release note: https://git.k8s.io/community/contributors/devel/pull-requests.md#write-release-notes-if-needed
-4. If the PR is unfinished, see how to mark it: https://github.com/kubernetes/community/blob/master/contributors/devel/pull-requests.md#marking-unfinished-pull-requests
+If this is your first contribution, read our Getting Started guide https://github.com/caicloud/engineering/blob/master/guidelines/README.md
 -->
